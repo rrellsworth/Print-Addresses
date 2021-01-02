@@ -1,9 +1,18 @@
 import csv
-from Options import *
+from fpdf import FPDF
+import Options
 
 # Default Options:
 FILE_NAME = "Address_Template.csv"
+OUTPUT_FILE = "Address_Output.pdf"
 OUTPUT = "ALL"
+
+WIDTH_MM = Options.WIDTH*25.4
+HEIGHT_MM = Options.HEIGHT*25.4
+
+
+class PDF(FPDF):
+    pass
 
 
 class Fields:
@@ -124,7 +133,7 @@ def main():
         
         # Arange Field Order:
         for i in range(len(fields)):
-            field_properties.set_field_idx(fields[i].lower(), i)  
+            field_properties.set_field_idx(fields[i].lower(), i)
     
         user = field_properties.check_fields()
         if (user):
@@ -139,6 +148,26 @@ def main():
                                                 country=row[field_properties.country_idx]))
             for i in address_list:
                 print(i.get() + "\n")
+                
+            user = input("Create PDF? (y/n) \n")
+            if (input):
+                pdf = PDF(orientation='L', unit='mm', format=(WIDTH_MM, HEIGHT_MM))
+                for address in address_list:
+                    pdf.add_page()
+                    # Return Address:
+                    pdf.set_font('Arial', '', 12)
+                    pdf.set_xy(5, 5)
+                    pdf.multi_cell(w=0, h=5.5, txt=Options.RETURN_ADDRESS, border=0, align='L')
+                    
+                    # Address:
+                    pdf.set_font('Arial', '', 14)
+                    pdf.set_xy((HEIGHT_MM/2)-25, WIDTH_MM/2-(18/2))
+                    pdf.multi_cell(w=0, h=7, txt=address.get(), border=0, align='L')
+
+                
+                pdf.output("Sample.pdf", 'F')
+            else:
+                pass
         else:
             print("END")
   
